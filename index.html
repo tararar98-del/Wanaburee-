@@ -1,0 +1,3064 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Wanaburee Staff Meal System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+
+body{
+  font-family:'Poppins',sans-serif;
+  margin:0;
+
+  padding:20px 12px;
+  box-sizing:border-box;
+
+  min-height:100vh;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  background:
+    linear-gradient(
+      rgba(0,0,0,0.18),
+      rgba(0,0,0,0.28)
+    ),
+    url('./BG.jpg');
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+
+  color:white;
+}
+
+/* 🌊 Waterfall Overlay */
+body::before{
+  content:"";
+
+  position:fixed;
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,0.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(0,180,120,0.10),
+      transparent 30%
+    );
+
+
+  pointer-events:none;
+}
+
+/* 🌴 Tropical Glow */
+body::after{
+  content:"";
+
+  position:fixed;
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,0.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(0,180,120,0.10),
+      transparent 30%
+    );
+
+  pointer-events:none;
+}
+
+    select {
+    font-size: 16px;
+    position: relative;
+    z-index: 10;
+    -webkit-appearance: menulist-button;
+    appearance: auto;
+    touch-action: manipulation;
+  }
+
+    #chart-container {
+  display: flex;
+  flex-wrap: wrap; /* ทำให้ responsive บนมือถือ */
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.meal.active {
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+#meal-info{
+  background:#fffaf3;
+
+  padding:18px 22px;
+
+  border-radius:20px;
+
+  border:2px solid #e0c9a6;
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,0.12);
+
+  min-width:220px;
+
+  text-align:left;
+
+  font-weight:700;
+
+  flex:1;
+}
+
+#mealsChart{
+  width:100% !important;
+  height:300px !important;
+
+  background:white;
+
+  border-radius:22px;
+
+  padding:18px;
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,0.08);
+}
+ button{
+  cursor:pointer;
+
+  border:none;
+
+  padding:14px 24px;
+
+  border-radius:16px;
+
+  font-size:15px;
+
+  font-weight:700;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8B5E3C,
+      #C89B6D
+    );
+
+  transition:0.3s;
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.25);
+}
+
+button:hover{
+  transform:
+    translateY(-3px);
+
+  filter:brightness(1.08);
+
+  box-shadow:
+    0 15px 30px rgba(0,0,0,0.35);
+}
+
+button:active{
+  transform:scale(0.96);
+}
+    button:hover { background-color: #157347; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+  .meals {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+  margin-top:10px;
+}
+
+.meal{
+  position:relative;
+
+  background:rgba(255,255,255,0.55);
+
+  border:2px solid rgba(255,255,255,0.5);
+
+  border-radius:24px;
+
+  padding:18px;
+
+  cursor:pointer;
+
+  transition:0.3s;
+
+  color:#5c4632;
+
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+
+
+  overflow:hidden;
+}
+
+/* 🌴 tropical shine */
+.meal::before{
+  pointer-events:none;
+  z-index:0;
+
+  background:
+    linear-gradient(
+      120deg,
+      transparent,
+      rgba(255,255,255,0.10),
+      transparent
+    );
+
+  transform:translateX(-100%);
+
+  pointer-events:none;
+}
+
+.meal:hover::before{
+  animation:shine 1s;
+}
+
+@keyframes shine{
+  100%{
+    transform:translateX(100%);
+  }
+}
+
+.meal:hover{
+  transform:
+    translateY(-6px)
+    scale(1.03);
+
+  background:
+    rgba(255,255,255,0.18);
+}
+
+
+.meal:hover{
+  transform:
+    translateY(-6px)
+    scale(1.03);
+
+  background:
+    rgba(255,255,255,0.18);
+}
+
+
+.meal.active{
+  background:
+    linear-gradient(
+      135deg,
+      #f7e7c1,
+      #fff8ea
+    );
+
+  border:
+    2px solid #d8b36a;
+
+  transform:
+    translateY(-5px)
+    scale(1.03);
+
+  box-shadow:
+    0 15px 30px rgba(212,175,55,0.25);
+}
+
+.meal-title{
+  font-size:15px;
+
+  font-weight:700;
+
+  margin-bottom:8px;
+
+  color:#5c3b28;
+
+  text-shadow:none;
+}
+
+.meal-title,
+.meal-menu{
+  position:relative;
+  z-index:2;
+}
+
+
+.meal-menu{
+  font-size:17px;
+
+  color:#4e342e;
+
+  font-weight:600;
+}
+
+/* Disabled checkbox inside meal */
+.meal input:disabled {
+  opacity: 0.5;
+}
+
+.meal input[type="checkbox"]{
+  display:block !important;
+
+  width:30px;
+  height:30px;
+
+  margin:0 auto 16px auto; /* ✅ ตรงกลาง */
+
+  accent-color:#f3ddc3;
+
+  cursor:pointer;
+}
+
+.active-tab {
+  background-color:#198754;
+  color:white;
+}
+table {
+  width: 100%;
+  table-layout: fixed; /* 🔥 บังคับแบ่งช่องเท่าๆ กัน */
+  font-size: 13px;
+}
+
+th, td {
+  padding: 6px;         /* ลด padding */
+  text-align: center;
+  word-break: break-word; /* กันคำยาวล้น */
+}
+
+/* ✅ มือถือ */
+@media (max-width: 768px) {
+  table {
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 6px;
+  }
+
+  h4 {
+    font-size: 16px;
+  }
+}
+
+/* ✅ มือถือเล็กมาก */
+@media (max-width: 480px) {
+  table {
+    font-size: 11px;
+  }
+
+  th, td {
+    padding: 4px;
+  }
+}
+
+table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+th {
+  font-size: 13px;
+}
+
+td {
+  white-space: nowrap;
+}
+
+table tr:last-child {
+  font-size: 15px;
+}
+td:first-child {
+  font-size: 14px;   /* 👈 ขยายชื่อ */
+  font-weight: 500;  /* 👈 ทำให้เด่นขึ้น */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meal-row {
+  display: flex;
+  flex-direction: column; /* 🔥 สำคัญ */
+  align-items: flex-start;
+  background: #f8f9fa;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.meal-row span:first-child {
+  font-size:15px;
+
+  font-weight:700;
+
+  color:#5d4037;
+
+  margin-bottom:6px;
+}
+
+.meal-row span:last-child {
+  font-size:20px;
+
+  color:#3e2723;
+
+  font-weight:800;
+
+  line-height:1.2;
+}
+
+#dashboard-table td[colspan="5"] {
+  font-size:16px;
+  letter-spacing:0.5px;
+}
+
+#announcementBox {
+  animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+  from {opacity:0; transform: translateY(-5px);}
+  to {opacity:1;}
+}
+
+#popupAnnounce {
+  animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+  from { transform: translate(-50%, -50px); opacity:0; }
+  to { transform: translate(-50%, 0); opacity:1; }
+}
+
+#popupAnnounce {
+  animation: popupFade 0.4s ease;
+}
+
+@keyframes popupFade {
+  from { opacity:0; transform:translate(-50%, -20px); }
+  to { opacity:1; transform:translate(-50%, 0); }
+}
+    button:active { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .success {background:#d1e7dd;color:#0f5132;padding:12px;border-radius:10px;margin-top:15px;font-weight:600;}
+   
+    
+ .logo{
+  width:220px;
+
+  max-width:80%;
+
+  height:auto;
+
+  display:block;
+
+  margin:auto;
+  margin-bottom:18px;
+
+  object-fit:contain;
+
+  filter:
+    drop-shadow(0 8px 18px rgba(0,0,0,0.25));
+
+  animation:floatLogo 4s ease-in-out infinite;
+}
+
+@keyframes floatLogo{
+  0%{
+    transform:translateY(0);
+  }
+
+  50%{
+    transform:translateY(-10px);
+  }
+
+  100%{
+    transform:translateY(0);
+  }
+}
+
+
+h2{
+  font-family:'Cinzel',serif;
+  font-size:34px;
+  color:white;
+  text-shadow:0 4px 15px rgba(0,0,0,0.4);
+}
+
+p{
+  color:rgba(255,255,255,0.85);
+
+  font-size:15px;
+}
+
+@keyframes floatLogo{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+  100%{transform:translateY(0)}
+}
+   .card{
+  width:430px;
+
+  background:
+    rgba(255,248,240,0.92);
+
+  border:
+    1px solid rgba(255,255,255,0.5);
+
+  border-radius:36px;
+
+  padding:38px;
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.35);
+
+  text-align:center;
+
+  position:relative;
+
+  overflow:hidden;
+
+  backdrop-filter: blur(8px);
+}
+
+/* 🌊 Water reflection */
+.card::before{
+  content:"";
+
+  position:absolute;
+
+  width:250px;
+  height:250px;
+
+  background:
+    radial-gradient(
+      rgba(255,255,255,0.12),
+      transparent 70%
+    );
+
+  top:-100px;
+  right:-100px;
+
+  border-radius:50%;
+}
+
+
+@keyframes fadeCard{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+}
+input,
+select{
+  width:100%;
+
+  padding:15px;
+
+  margin:10px 0;
+
+  border:none;
+
+  border-radius:18px;
+
+  background:rgba(255,255,255,0.92);
+
+  color:#3e2723;
+
+  font-size:16px;
+
+  font-weight:600;
+
+  backdrop-filter:blur(4px);
+
+  box-sizing:border-box;
+
+  transition:0.25s;
+
+  border:2px solid rgba(255,255,255,0.7);
+
+  box-shadow:
+    0 4px 15px rgba(0,0,0,0.12);
+}
+
+input::placeholder{
+  color:#795548;
+}
+
+select option{
+  color:#3e2723;
+  background:white;
+}
+
+input:focus,
+select:focus{
+  outline:none;
+
+  background:
+    rgba(255,255,255,0.22);
+
+  box-shadow:
+    0 0 0 4px rgba(255,255,255,0.15);
+}
+
+    .dashboard{
+  padding:18px;
+  width:100%;
+  box-sizing:border-box;
+}
+
+@media (max-width:768px){
+
+  .dashboard{
+    padding:10px;
+  }
+
+}
+    .cards {display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:25px;}
+   .box{
+  background:rgba(255,255,255,0.88);
+
+  backdrop-filter:blur(10px);
+
+  border-radius:24px;
+
+  padding:20px;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.12);
+
+  border:1px solid rgba(255,255,255,0.4);
+
+  transition:0.25s;
+}
+
+.box:hover{
+  transform:translateY(-3px);
+}
+
+.box h2{
+  margin:0;
+
+  font-size:42px;
+
+  font-weight:800;
+
+  color:#5d4037;
+
+  text-shadow:
+    0 2px 8px rgba(0,0,0,0.12);
+}
+
+@media (max-width:768px){
+
+  .box h2{
+    font-size:32px;
+  }
+
+}
+
+
+h3,h4{
+  color:#4e342e;
+  font-weight:700;
+  text-shadow:none;
+}
+
+h3{
+  font-size:24px;
+}
+
+h4{
+  font-size:18px;
+  margin-top:18px;
+}
+
+.card p{
+  color:#5d4037;
+  font-weight:600;
+}
+   
+    table{
+  width:100%;
+
+  border-collapse:collapse;
+
+  background:white;
+
+  border-radius:18px;
+
+  overflow:hidden;
+
+  box-shadow:
+    0 4px 15px rgba(0,0,0,0.06);
+
+  color:#4e342e;
+}
+   td{
+  padding:12px;
+
+  border-bottom:
+    1px solid #f1e6dc;
+
+  text-align:center;
+
+  color:#4e342e;
+}
+   .kitchen {
+  text-align: center;
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.kitchen h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #f7f8f7;
+  box-shadow: 0 4px 12px rgba(247, 231, 231, 0.15);
+}
+
+.kitchen button {
+  background-color: #051ce9;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.kitchen button:hover {
+  background-color: #157347;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+
+/* Grid responsive สำหรับ Kitchen boxes */
+.kitchen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+/* Kitchen box styling */
+.kitchen-box {
+  background: linear-gradient(145deg, #d1e7dd, #ffffff);
+  padding: 30px 15px;
+  border-radius: 25px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.kitchen-box:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 18px 35px rgba(0,0,0,0.25);
+}
+
+.kitchen-box h1 {
+  font-size: 50px;
+  color: #198754;
+  margin: 0 0 10px 0;
+}
+
+.kitchen-box p {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* Responsive text สำหรับมือถือ */
+@media (max-width: 600px) {
+  .kitchen-box h1 {
+    font-size: 36px;
+  }
+  .kitchen-box p {
+    font-size: 16px;
+  }
+  .kitchen-grid {
+    gap: 18px;
+  }
+  .kitchen button {
+    width: 100%;
+  }
+}
+#tab-today, #tab-tomorrow {
+  background:#e9ecef;
+  color:#333;
+}
+
+.active-tab {
+  background:#198754 !important;
+  color:white !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+select {
+  font-size: 16px;
+  position: relative;
+  z-index: 10;
+  -webkit-appearance: menulist-button;
+  appearance: auto;
+  touch-action: manipulation;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+}
+
+*{
+  scroll-behavior:smooth;
+}
+
+::-webkit-scrollbar{
+  width:10px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#00c6ff;
+  border-radius:10px;
+}
+
+.table-wrapper{
+  width:100%;
+  overflow-x:auto;
+  border-radius:18px;
+}
+
+ @media (max-width:768px){
+
+  button{
+    width:auto !important;
+    min-width:unset;
+    padding:8px 12px !important;
+    font-size:13px !important;
+    border-radius:12px;
+  }
+
+}
+
+
+
+/* ✅ Mobile Fix กันล้นจอ */
+html,
+body{
+  width:100%;
+  overflow-x:hidden;
+}
+
+/* ✅ card responsive */
+.card{
+  width:min(430px, 92vw);
+  padding:22px;
+  box-sizing:border-box;
+}
+
+/* ✅ มือถือแนวตั้ง */
+@media (max-width:768px){
+
+  body{
+    align-items:flex-start;
+    padding:20px 0;
+  }
+
+  .dashboard{
+    padding:12px;
+  }
+
+  .topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.topbar button{
+  padding:10px 14px;
+  font-size:13px;
+}
+
+  .cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  margin-bottom:20px;
+}
+
+  #chart-container{
+    flex-direction:column;
+  }
+
+  #meal-info{
+    width:100%;
+  }
+
+  #mealsChart{
+    height:260px !important;
+  }
+
+  .box h2{
+    font-size:40px;
+  }
+
+  h2{
+    font-size:24px;
+  }
+
+  .logo{
+    width:170px;
+  }
+
+  button{
+    width:100%;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+}
+
+/* ✅ มือถือเล็กมาก */
+@media (max-width:480px){
+
+  .card{
+    border-radius:24px;
+    padding:18px;
+  }
+
+  .meal{
+    padding:14px;
+  }
+
+  .meal-title{
+    font-size:14px;
+  }
+
+  .meal-menu{
+    font-size:13px;
+  }
+
+  input,
+  select{
+    font-size:15px;
+    padding:13px;
+  }
+}
+
+@media (max-width:480px){
+
+  .card{
+    border-radius:24px;
+    padding:18px;
+  }
+
+  .meal{
+    padding:14px;
+  }
+
+  .meal-title{
+    font-size:14px;
+  }
+
+  .meal-menu{
+    font-size:15px;
+  }
+
+  input,
+  select{
+    font-size:15px;
+    padding:13px;
+  }
+}
+
+/* 🔥 วางตรงนี้ */
+.dashboard{
+  width:100%;
+  max-width:100%;
+  padding:12px;
+  box-sizing:border-box;
+}
+
+.topbar{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.kitchen {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.kitchen h2 {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+/* วันที่ */
+.kitchen-section {
+  margin-bottom: 25px;
+}
+
+.kitchen-date {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* 2 x 2 */
+.kitchen-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Card */
+.kitchen-box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px 10px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  border: 1px solid #eee;
+  min-height: 105px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.kitchen-box h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.kitchen-box p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Back */
+.kitchen-back-btn {
+  width: 100%;
+  margin-top: 5px;
+  padding: 13px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* =========================
+   KITCHEN DASHBOARD
+========================= */
+
+.kitchen {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.kitchen h2 {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+/* วันที่ */
+.kitchen-section {
+  margin-bottom: 25px;
+}
+
+.kitchen-date {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* 2 x 2 */
+.kitchen-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Card */
+.kitchen-box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px 10px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  border: 1px solid #eee;
+  min-height: 105px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.kitchen-box h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.kitchen-box p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Back */
+.kitchen-back-btn {
+  width: 100%;
+  margin-top: 5px;
+  padding: 13px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+
+  .kitchen-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .kitchen-box {
+    min-height: 120px;
+  }
+
+}
+
+/* ... CSS ที่เหลือทั้งหมด ... */
+
+
+/* =========================================================
+   ADMIN MOBILE FIX
+   ========================================================= */
+.dashboard{
+  max-width:1200px;
+  margin:0 auto;
+}
+
+.dashboard-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+
+.dashboard-actions input[type="date"]{
+  width:auto;
+  min-width:150px;
+  margin:0;
+}
+
+.dashboard-actions button{
+  white-space:nowrap;
+}
+
+#dashboard-table{
+  min-width:760px;
+}
+
+#dashboard-table td:last-child{
+  white-space:nowrap;
+}
+
+#dashboard-table td:last-child button{
+  margin:2px;
+  padding:8px 10px;
+  font-size:13px;
+}
+
+.admin-edit-modal{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(0,0,0,.58);
+  box-sizing:border-box;
+}
+
+.admin-edit-box{
+  width:min(440px, 100%);
+  max-height:92vh;
+  overflow-y:auto;
+  background:#fffaf3;
+  color:#4e342e;
+  border-radius:24px;
+  padding:22px;
+  box-sizing:border-box;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+
+.admin-edit-box h3{
+  margin:0 0 6px;
+  color:#5d4037;
+}
+
+.admin-edit-box .edit-subtitle{
+  margin:0 0 16px;
+  color:#795548;
+  font-size:13px;
+}
+
+.admin-edit-box label{
+  display:block;
+  margin:12px 0 6px;
+  font-weight:700;
+  color:#5d4037;
+}
+
+.admin-edit-box input,
+.admin-edit-box select{
+  width:100%;
+  box-sizing:border-box;
+  margin:0;
+  min-height:48px;
+}
+
+.edit-meals{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:8px;
+}
+
+.edit-meal-option{
+  display:flex !important;
+  align-items:center;
+  gap:8px;
+  padding:12px;
+  margin:0 !important;
+  background:#fff;
+  border:1px solid #ead8c5;
+  border-radius:14px;
+  cursor:pointer;
+}
+
+.edit-meal-option input{
+  width:22px !important;
+  min-height:22px !important;
+  margin:0 !important;
+  accent-color:#198754;
+}
+
+.edit-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:20px;
+}
+
+.edit-actions button{
+  width:100%;
+}
+
+.edit-cancel{
+  background:#6c757d !important;
+}
+
+@media (max-width:768px){
+  .dashboard{
+    padding:8px !important;
+  }
+
+  .topbar{
+    align-items:stretch !important;
+  }
+
+  .topbar h2{
+    width:100%;
+    text-align:center;
+    margin:5px 0 8px;
+  }
+
+  .dashboard-actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    width:100%;
+  }
+
+  .dashboard-actions button,
+  .dashboard-actions input[type="date"]{
+    width:100% !important;
+    min-width:0;
+    margin:0;
+    box-sizing:border-box;
+  }
+
+  .dashboard-actions input[type="date"]{
+    min-height:44px;
+  }
+
+  #chart-container{
+    gap:12px !important;
+  }
+
+  #mealsChart{
+    height:250px !important;
+    padding:8px !important;
+    box-sizing:border-box;
+  }
+
+  #meal-info{
+    min-width:0 !important;
+    box-sizing:border-box;
+    padding:12px !important;
+  }
+
+  .table-wrapper{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  #dashboard-table{
+    min-width:760px;
+  }
+
+  .admin-edit-box{
+    padding:18px;
+    border-radius:20px;
+  }
+
+  .edit-meals{
+    grid-template-columns:1fr;
+  }
+
+  .edit-actions{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width:420px){
+  .dashboard-actions{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .dashboard-actions button{
+    font-size:12px !important;
+    padding:9px 6px !important;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="menuModal" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+">
+
+  <div style="
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    width:90%;
+    max-width:400px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  ">
+    <h3 style="margin-bottom:15px;">🍽️ Today's Menu</h3>
+
+    <p id="menu-date" style="
+      margin-top:-10px;
+      margin-bottom:15px;
+      font-size:14px;
+      font-weight:600;
+      color:#666;
+    "></p>
+
+    <div class="meal-row"><span>🍳 Morning</span><span id="menu-morning"></span></div>
+    <div class="meal-row"><span>🍛 Noon</span><span id="menu-noon"></span></div>
+    <div class="meal-row"><span>🍜 Evening</span><span id="menu-evening"></span></div>
+    <div class="meal-row"><span>🌙 Night</span><span id="menu-night"></span></div>
+
+    <br>
+    <button onclick="closeMenuModal()">Close</button>
+  </div>
+
+</div>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+   import { 
+  getFirestore, collection, onSnapshot, doc, setDoc, getDocs, getDoc, 
+  query, where, deleteDoc, addDoc, orderBy 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMnLd8ExAYYSqibe4l8DhPraKVmYxzaFY",
+      authDomain: "hotel-staff-2026.firebaseapp.com",
+      projectId: "hotel-staff-2026",
+      storageBucket: "hotel-staff-2026.firebasestorage.app",
+      messagingSenderId: "998985926525",
+      appId: "1:998985926525:web:4b4bbc7fb9435e7b612e14",
+      measurementId: "G-GQC18HT7SS"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    window.db = db;
+
+    function compressImage(file, maxWidth = 800, quality = 0.7) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = e => {
+      img.src = e.target.result;
+    };
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+    
+    if ("serviceWorker" in navigator) 
+      navigator.serviceWorker.register("sw.js").catch(()=>{});
+    
+    let lastRegistered = localStorage.getItem("lastRegistered") || "";
+    let mode = location.hash.replace("#","");
+
+    window.addEventListener("hashchange", () => {
+  mode = location.hash.replace("#", "");
+  renderPage(); // โหลดหน้าใหม่แบบ SPA โดยไม่ต้องรีเฟรชทั้งหน้า
+});
+    let allData = [];
+    let menu = {Morning:"",Noon:"",Evening:"",Night:""};
+    let isSubmitting = false;
+    let currentTab = "today";
+
+    let excelData = [];
+   
+    function getDateByTab(tab){  
+  if(tab === "today"){  
+    return formatDate();  
+  } else {  
+    return formatDate(new Date(), 1);  
+  }
+}
+    let unsubscribeStaff = null;
+    let unsubscribeKitchen = null;
+    let unsubscribeMenu = null;
+    let unsubscribeDashboard = null;
+    let unsubscribeView = null; 
+    let isFirstLoad = true;
+
+  function clearListeners(){  
+  if(unsubscribeStaff) unsubscribeStaff();  
+  if(unsubscribeKitchen) unsubscribeKitchen();  
+  if(unsubscribeDashboard) unsubscribeDashboard();
+  if(unsubscribeView) unsubscribeView();  
+  if(unsubscribeMenu) unsubscribeMenu();  
+}
+    
+   function formatDate(date = new Date(), addDays = 0) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0); // 👈 สำคัญ
+  d.setDate(d.getDate() + addDays);
+
+  let day = String(d.getDate()).padStart(2,"0");
+  let month = String(d.getMonth()+1).padStart(2,"0");
+  let year = d.getFullYear();
+
+  return `${day}-${month}-${year}`;
+}
+    
+   if(mode=="admin") showLogin();
+else if(mode=="kitchen") showKitchen();
+else if(mode=="view") showViewPage();
+else showStaff();
+
+   function showStaff(){
+  renderStaff();
+  updateMenuUI(); // 👈 เพิ่มตรงนี้
+
+  const todayStr = formatDate();
+
+let lastAnnounce = "";
+
+onSnapshot(doc(db,"announcements", todayStr), (docSnap)=>{
+  const box = document.getElementById("announcementBox");
+
+  if(docSnap.exists()){
+    const data = docSnap.data();
+
+    box.style.display = "block";
+    box.innerHTML = `
+  📢 ${data.text || ""}
+  ${data.image ? `<br><img src="${data.image}" style="max-width:100%; margin-top:10px; border-radius:10px;">` : ""}
+`;
+
+  if(lastAnnounce !== data.text){
+
+  const popup = document.getElementById("popupAnnounce");
+  const textEl = document.getElementById("popupText");
+  const imgEl = document.getElementById("popupImage");
+
+  textEl.innerText = data.text || "";
+
+  if(data.image){
+    imgEl.src = data.image;
+    imgEl.style.display = "block";
+  } else {
+    imgEl.style.display = "none";
+  }
+
+  popup.style.display = "block";
+
+  // 🔊 เล่นเสียง
+const sound = document.getElementById("announceSound");
+
+document.addEventListener("click", () => {
+    sound.load();   // โหลดไฟล์เสียง
+}, { once: true });
+
+  setTimeout(()=>{
+    popup.style.display = "none";
+  }, 5000);
+
+  lastAnnounce = data.text;
+}
+
+  } else {
+    box.style.display = "none";
+  }
+});
+
+  if(unsubscribeMenu) unsubscribeMenu();
+
+ const tomorrowStr = formatDate(new Date(), 1);
+
+unsubscribeMenu = onSnapshot(doc(db,"menu", tomorrowStr), (docSnap)=>{
+  if(docSnap.exists()){ 
+    menu = docSnap.data();  
+  } else {
+    menu = {
+      Morning:"❌ ยังไม่กำหนด",
+      Noon:"❌ ยังไม่กำหนด",
+      Evening:"❌ ยังไม่กำหนด",
+      Night:"❌ ยังไม่กำหนด"
+    };
+  }
+  updateMenuUI();
+});
+}
+     
+ function updateMenuUI() {
+  document.querySelectorAll(".meal").forEach(el => {
+    const checkbox = el.querySelector("input");
+    const type = checkbox.value;
+
+    const checked = checkbox.checked;
+
+    const menuEl = el.querySelector(".meal-menu");
+if(menuEl){
+  menuEl.innerText = menu[type] || "";
+}
+
+    el.classList.toggle("active", checked);
+  });
+}
+
+function toggleMeal(el) {
+  const checkbox = el.querySelector("input");
+
+  checkbox.checked = !checkbox.checked;
+
+  checkbox.dispatchEvent(new Event('change'));
+
+  const checkedCount = document.querySelectorAll(".meal input:checked").length;
+
+  document.querySelectorAll(".meal").forEach(meal => {
+    const cb = meal.querySelector("input");
+    cb.disabled = !cb.checked && checkedCount >= 2;
+    meal.classList.toggle("active", cb.checked);
+  });
+}
+   function renderStaff(){
+  const tomorrowStr = formatDate(new Date(), 1); // วันที่พรุ่งนี้
+
+  document.getElementById("app").innerHTML= `
+    <div style="
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:12px;
+">
+
+  <button
+    onclick="location.hash='admin'"
+    style="
+      padding:8px 14px;
+      font-size:15px;
+      border-radius:12px;
+    ">
+    Admin
+  </button>
+
+  <button
+    onclick="location.hash='kitchen'"
+    style="
+      padding:8px 15px;
+      font-size:15px;
+      border-radius:12px;
+    ">
+    Kitchen
+  </button>
+
+  <button
+    onclick="location.hash='view'"
+    style="
+      padding:8px 15px;
+      font-size:15px;
+      border-radius:12px;
+    ">
+    📋 Meals
+  </button>
+
+  <button
+    onclick="showTodayMenu()"
+    style="
+      background:linear-gradient(135deg,#ffc107,#ff9800);
+      color:#fff;
+      font-weight:600;
+      border:none;
+      padding:8px 14px;
+      border-radius:12px;
+      font-size:15px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+    ">
+    🍽️ Today Menu
+  </button>
+
+</div>
+
+    <div class="card">
+       <div id="announcementBox" style="
+    background:#fff3cd;
+    color:#856404;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:15px;
+    font-weight:600;
+    display:none;
+  "></div>
+
+  <button id="musicBtn">🎵 เปิดเพลง</button>
+
+      <img src="logo.png" class="logo">
+      <h2 style="
+  font-size:30px;
+  margin-bottom:5px;
+  color:#6d4c41;
+">
+Khaolak Wanaburee Resort 
+</h2>
+
+<p style="
+  margin-top:0;
+  color:#6d4c41;
+  font-size:15px;
+  font-weight:600;
+">
+</p>
+      <p>🌿🌻🌿 Staff Meal Registration 🌿🌻🌿</p>
+
+      <input id="name" placeholder="Staff Name">
+
+      <select id="dept">
+        <option value="">Department</option>
+        <option value="ADMIN">ADMIN</option>
+        <option value="AC(บัญชี)">AC(บัญชี)</option>
+        <option value="FO(ต้อนรับ)">FO(ต้อนรับ)</option>
+        <option value="HR(บุคคล)">HR(บุคคล)</option>
+        <option value="EN(ช่าง)">EN(ช่าง)</option>
+        <option value="HK(แม่บ้าน)">HK(แม่บ้าน)</option>
+        <option value="MK(ครัว)">MK(ครัว)</option>
+        <option value="FB(เสริฟ)">FB(เสริฟ)</option>
+        <option value="GD(คนสวน)">GD(คนสวน)</option>
+      </select>
+
+      <!-- แสดงวันที่พรุ่งนี้แบบอ่านอย่างเดียว -->
+      <p style="font-weight:600; margin:10px 0;">
+📅 ลงทะเบียนสำหรับวันที่: ${tomorrowStr}
+</p>
+
+      <div class="meals">
+
+  <!-- Morning -->
+  <div class="meal">
+    <label class="meal-select">
+      <input type="checkbox" value="Morning"
+             onchange="toggleMeal(this.closest('.meal'))">
+
+      <div class="meal-title">
+        <img src="morning.png"
+             style="width:50px;height:50px;object-fit:contain;margin-bottom:4px;"><br>
+        Morning
+      </div>
+
+      <div class="meal-menu"></div>
+    </label>
+  </div>
+
+
+  <!-- Noon -->
+  <div class="meal">
+    <label class="meal-select">
+      <input type="checkbox" value="Noon"
+             onchange="toggleMeal(this.closest('.meal'))">
+
+      <div class="meal-title">
+        <img src="noon.png"
+             style="width:50px;height:50px;object-fit:contain;margin-bottom:4px;"><br>
+        Noon
+      </div>
+
+      <div class="meal-menu"></div>
+    </label>
+  </div>
+
+
+  <!-- Evening -->
+  <div class="meal">
+    <label class="meal-select">
+      <input type="checkbox" value="Evening"
+             onchange="toggleMeal(this.closest('.meal'))">
+
+      <div class="meal-title">
+        <img src="evening.png"
+             style="width:50px;height:50px;object-fit:contain;margin-bottom:4px;"><br>
+        Evening
+      </div>
+
+      <div class="meal-menu"></div>
+    </label>
+  </div>
+
+
+  <!-- Night -->
+  <div class="meal">
+    <label class="meal-select">
+      <input type="checkbox" value="Night"
+             onchange="toggleMeal(this.closest('.meal'))">
+
+      <div class="meal-title">
+        <img src="night.png"
+             style="width:50px;height:50px;object-fit:contain;margin-bottom:4px;"><br>
+        Night
+      </div>
+
+      <div class="meal-menu"></div>
+    </label>
+  </div>
+
+      </div>
+      <p style="
+  font-size:17px;
+  color:#6d4c41;
+  text-align:center;
+  font-weight:700;
+  background:#fff3e6;
+  padding:14px;
+  border-radius:16px;
+  margin-top:16px;
+  border:2px dashed #d7b899;
+">
+  🌻🌸 เลือกได้สูงสุด 2 มื้อ 🌸🌻
+</p>
+      <button id="registerBtn" onclick="register()">Register</button>
+      <p id="msg"></p>
+      <div id="list"></div>
+    </div>
+  `;
+
+  // โหลดชื่อเดิม
+  if(document.getElementById("name")){
+    document.getElementById("name").value = lastRegistered;
+  }
+
+  // 🎵 Music Control
+const musicBtn = document.getElementById("musicBtn");
+const bgMusic = document.getElementById("bgMusic");
+
+let isPlaying = false;
+
+if(musicBtn && bgMusic){
+
+  musicBtn.onclick = async function(){
+
+    if(!isPlaying){
+
+      bgMusic.volume = 0.3;
+
+      try{
+        await bgMusic.play();
+
+        musicBtn.innerHTML="🔇 ปิดเพลง";
+        isPlaying=true;
+
+      }catch(err){
+        console.log(err);
+      }
+
+    }else{
+
+      bgMusic.pause();
+
+      musicBtn.innerHTML="🎵 เปิดเพลง";
+      isPlaying=false;
+
+    }
+
+  };
+
+}
+
+  document.getElementById("list").innerHTML = "⏳ Loading...";
+
+  if(unsubscribeStaff) unsubscribeStaff();
+
+  unsubscribeStaff = onSnapshot(
+    query(collection(db,"staffmeal"), where("date","==",tomorrowStr)), // ดึงข้อมูลวันพรุ่งนี้
+    snapshot => {
+      const tomorrowData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      allData = tomorrowData;
+
+      let html = `<h3>📋 Staff Meal List (${tomorrowStr})</h3>`;
+
+      const deptOrder = [
+  "ADMIN",
+  "AC(บัญชี)",
+  "FO(ต้อนรับ)",
+  "HR(บุคคล)",
+  "EN(ช่าง)",
+  "HK(แม่บ้าน)",
+  "MK(ครัว)",
+  "FB(เสริฟ)",
+  "GD(คนสวน)"
+];
+
+const depts = deptOrder.filter(dept =>
+  tomorrowData.some(x => x.dept === dept)
+);
+      depts.forEach(dept => {
+        html += `<h4> ${dept}</h4>`;
+        html += `<table><tr><th>Name</th><th>Meals</th></tr>`;
+        tomorrowData.filter(x => x.dept === dept).forEach(x => {
+          html += `<tr>
+            <td>${x.name}</td>
+            <td>${x.meals.join(", ")}</td>
+          </tr>`;
+        });
+        html += `</table>`;
+      });
+
+      document.getElementById("list").innerHTML = html;
+    }
+  );
+  }
+
+function renderPage() {
+  clearListeners();
+
+  if(mode=="admin") showLogin();
+  else if(mode=="kitchen") showKitchen();
+  else if(mode=="view") showViewPage(); 
+  else showStaff();
+}
+
+window.register = async function() {
+  if(isSubmitting) return;
+  isSubmitting = true;
+
+  const btn = document.getElementById("registerBtn");
+  btn.disabled = true;
+  btn.innerText = "Loading...";
+  btn.style.opacity = "0.6";
+
+  try {
+    const name = document.getElementById("name").value.trim();
+    const dept = document.getElementById("dept").value.trim();
+
+    if (!name || !dept) {
+  alert("กรุณากรอกข้อมูลให้ครบ");
+  btn.disabled = false;
+  btn.innerText = "Register";
+  isSubmitting = false;
+  return;
+}
+
+if(!confirm("ยืนยันการลงทะเบียนใช่ไหม?")) {
+  btn.disabled = false;
+  btn.innerText = "Register";
+  isSubmitting = false;
+  return;
+}
+
+    const meals = [...document.querySelectorAll(".meal input:checked")].map(x => x.value);
+    console.log("MEALS:", meals);
+
+   if (meals.length === 0 || meals.length > 2) {
+  alert("เลือกได้ 1-2 มื้อ");
+
+  btn.disabled = false;
+  btn.innerText = "Register";
+  btn.style.opacity = "1";
+  isSubmitting = false;
+
+  return;
+}
+    // 🔥 (แก้ข้อ 3 ด้วยด้านล่าง)
+    const cleanName = name.trim().toLowerCase();
+
+const isDuplicate = allData.find(x =>
+  x.name.trim().toLowerCase() === cleanName &&
+  x.dept === dept
+);
+   if (isDuplicate) {
+  alert("คุณลงทะเบียนไปแล้วในแผนกนี้");
+
+  btn.disabled = false;
+  btn.innerText = "Register";
+  isSubmitting = false;
+
+  return;
+}
+
+const staffRef = collection(db, "staffmeal");
+const newDocRef = doc(staffRef);
+
+await setDoc(newDocRef, {
+  name: name.trim(),
+  dept,
+  meals,
+  time: new Date().toLocaleTimeString('en-GB'),
+  date: formatDate(new Date(), 1) // บันทึกสำหรับวันถัดไป
+});
+
+   localStorage.setItem("lastRegistered", name);
+   document.getElementById("msg").innerHTML =
+  "<div class='success'>✔ Registration Successful</div>";
+
+ btn.innerText = "✔ Done";
+
+setTimeout(() => {
+  btn.innerText = "Register";
+}, 2000);
+
+isSubmitting = false;
+btn.disabled = false;
+
+// 👇 เลื่อนก่อน
+window.scrollTo({ top: 0, behavior: "smooth" });
+
+// 👇 แล้วค่อย reset
+resetForm();
+
+  } catch(err) {
+  console.error(err);
+  alert("Error: " + err.message);
+
+  btn.innerText = "Register";
+  btn.disabled = false;
+  isSubmitting = false;
+}
+};
+
+// --- resetForm ---
+function resetForm() {
+  setTimeout(() => document.querySelector(".success")?.remove(), 3000);
+
+  document.getElementById("name").value = ""; // 👈 ใส่ตรงนี้
+  document.getElementById("dept").value = "";
+
+  document.querySelectorAll(".meal").forEach(el => {
+    el.classList.remove("active");
+    el.querySelector("input").checked = false;
+    el.querySelector("input").disabled = false;
+  });
+}
+
+// --- showLogin separated ---
+function showLogin() {
+  document.getElementById("app").innerHTML= `<div class="card">
+    <h2>🌻HR Login🌻</h2>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>`;
+}
+
+window.login = function(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
+
+  if(u=="hr" && p=="wanaburee") {
+    showMenuSetting(); // ✅ เข้าเมนูก่อน
+  } else {
+    alert("Wrong password");
+  }
+};
+
+window.loadAnnouncements = function(){
+  const q = query(
+    collection(db,"announcements"),
+    orderBy("time","desc")
+  );
+
+  onSnapshot(q, snapshot=>{
+    let html = "";
+
+    snapshot.forEach(docSnap=>{
+      const data = docSnap.data();
+      const id = docSnap.id;
+
+      html += `
+        <div style="background:#f8f9fa; padding:10px; border-radius:8px; margin-bottom:8px;">
+          <div>${data.text}</div>
+          <small>${data.date} ${data.time}</small><br>
+          <button onclick="deleteAnnouncement('${id}')" style="margin-top:5px; background:red;">Delete</button>
+        </div>
+      `;
+    });
+
+    document.getElementById("announceList").innerHTML = html;
+  });
+};
+
+window.saveAnnouncement = async function(){
+  const text = document.getElementById("announceText").value.trim();
+  const file = document.getElementById("announceImage").files[0];
+
+  if(!text && !file){
+    alert("กรุณาใส่ข้อความหรือรูป");
+    return;
+  }
+
+  let imageBase64 = "";
+
+  if(file){
+    imageBase64 = await compressImage(file); // ✅ ตรงนี้แหละ
+  }
+
+  await setDoc(doc(db,"announcements", formatDate()), {
+    text: text,
+    image: imageBase64,
+    date: formatDate(),
+    time: new Date().toLocaleTimeString('en-GB')
+  });
+
+  alert("📢 Posted!");
+  document.getElementById("announceText").value = "";
+  document.getElementById("announceImage").value = "";
+};
+
+window.showMenuSetting = function() {
+  document.getElementById("app").innerHTML = `
+    <div class="card">
+      <h3>🍽️ Meal Menu Setting</h3>
+
+<input id="m1" placeholder="Morning menu" value="${menu.Morning || ''}">
+<input id="m2" placeholder="Noon menu" value="${menu.Noon || ''}">
+<input id="m3" placeholder="Evening menu" value="${menu.Evening || ''}">
+<input id="m4" placeholder="Night menu" value="${menu.Night || ''}">
+
+      <button onclick="saveMenuAndGo()">💾 Save & Go to Dashboard</button>
+
+      <hr>
+
+<h3>📢 Announcement</h3>
+
+<textarea id="announceText" placeholder="📢 Announcement..." 
+style="width:100%; height:80px; margin-top:10px;"></textarea>
+
+<input type="file" id="announceImage" accept="image/*" style="margin-top:10px;">
+
+<button onclick="saveAnnouncement()">📢 Save Announcement</button>
+<button onclick="deleteAnnouncement()" style="background:red;">
+  🗑️ Delete Today Announcement
+</button>
+
+      <br><br>
+      <button onclick="goStaff()">← Back to Staff</button>
+    </div>
+  `;
+}
+
+window.saveMenuAndGo = async function(){
+  let newMenu = {
+    Morning: document.getElementById("m1").value,
+    Noon: document.getElementById("m2").value,
+    Evening: document.getElementById("m3").value,
+    Night: document.getElementById("m4").value
+  };
+
+  // 🔥 เช็คว่ากรอกครบ
+  if(!newMenu.Morning || !newMenu.Noon || !newMenu.Evening || !newMenu.Night){
+    alert("กรุณากรอกเมนูให้ครบทุกมื้อ");
+    return;
+  }
+
+  const tomorrowStr = formatDate(new Date(), 1);
+  await setDoc(doc(db,"menu", tomorrowStr), newMenu);
+
+  // อัปเดตในหน้า
+  menu = newMenu;
+
+  alert("✅ Menu updated!");
+
+  // 👉 เข้า Dashboard
+  showDashboard();
+};
+
+document.addEventListener("click", () => {
+    bgMusic.volume = 0.3;
+    bgMusic.play().catch(err => console.log(err));
+}, { once: true });
+
+
+
+// --- SPA initial load ---
+renderPage();
+
+setTimeout(()=>document.querySelector(".success")?.remove(),3000);
+
+window.exportExcel = async function() {
+
+  let formattedDate;
+  const dateInput = document.getElementById("dashboard-date");
+
+  if(dateInput && dateInput.value){
+    const d = new Date(dateInput.value);
+    formattedDate = formatDate(d);
+  } else {
+    formattedDate = getDateByTab(currentTab);
+  }
+
+  if(excelData.length === 0) { 
+    alert("No data to export"); 
+    return; 
+  }
+
+  // 🔥 แปลงข้อมูลใหม่ (กัน error meals)
+ const formattedData = excelData.map(x => ({
+  Date: x.date || "",
+  Name: x.name || "",
+  Dept: x.dept || "",
+  Meal: Array.isArray(x.meals) ? x.meals.join(", ") : "",
+  Time: x.time || ""
+}));
+
+  // 🔥 สร้าง sheet
+  let ws = XLSX.utils.json_to_sheet(formattedData, {
+  header: ["Date","Name","Dept","Meal","Time"]
+});
+
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Staff Meals");
+
+  XLSX.writeFile(wb, `StaffMeals_${formattedDate}.xlsx`);
+};
+
+function showDashboard() {
+  document.getElementById("app").innerHTML = `
+<div class="dashboard">
+
+  <div class="topbar">
+
+    <h2>📊 Staff Meal Dashboard</h2>
+
+    <div class="dashboard-actions">
+
+      <button onclick="switchTab('today')" id="tab-today">
+        Today
+      </button>
+
+      <button onclick="switchTab('tomorrow')" id="tab-tomorrow">
+        Tomorrow
+      </button>
+
+      <input
+        type="date"
+        id="dashboard-date"
+        value="${new Date().toISOString().split('T')[0]}"
+        onchange="updateDashboardData()"
+      >
+
+      <button onclick="exportExcel()">
+        Export
+      </button>
+
+      <button onclick="showMenuSetting()">
+        Edit Menu
+      </button>
+
+      <button onclick="goStaff()">
+        ← Back
+      </button>
+
+    </div>
+  </div>
+
+  <div class="cards">
+
+    <div class="box">
+      <h2 id="total-staff">0</h2>
+      <p>Total Staff</p>
+    </div>
+
+    <div class="box">
+      <h2 id="total-meals">0</h2>
+      <p>Total Meals</p>
+    </div>
+
+    <div class="box">
+      <h2 id="selected-date">${formatDate()}</h2>
+      <p>Date</p>
+    </div>
+
+  </div>
+
+  <p id="loading-text">⏳ Loading data...</p>
+
+  <div id="chart-container">
+
+    <canvas id="mealsChart"></canvas>
+
+    <div id="meal-info">
+
+      <div class="meal-row">
+        <span>🍳 Morning</span>
+        <span id="count-morning">0</span>
+      </div>
+
+      <div class="meal-row">
+  <span>🍛 Noon</span>
+  <span id="count-noon">0</span>
+</div>
+
+      <div class="meal-row">
+        <span>🍜 Evening</span>
+        <span id="count-evening">0</span>
+      </div>
+
+      <div class="meal-row">
+        <span>🌙 Night</span>
+        <span id="count-night">0</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="table-wrapper">
+
+    <table id="dashboard-table">
+
+      <tr>
+        <th>Name</th>
+        <th>Dept</th>
+        <th>Meals</th>
+        <th>Time</th>
+        <th>Action</th>
+      </tr>
+
+    </table>
+
+  </div>
+
+</div>
+`;
+  setTimeout(() => switchTab("today"), 100);
+  // โหลดข้อมูลของวันนี้ตอนแรก
+}
+
+let mealsChart = null; // global chart variable
+
+function updateDashboardData(){
+  if(unsubscribeDashboard) unsubscribeDashboard();
+
+  const chartEl = document.getElementById("mealsChart");
+  const loadingEl = document.getElementById("loading-text");
+
+  if(chartEl) chartEl.style.opacity = "0.5";
+  if(loadingEl) loadingEl.style.display = "block";
+
+  let formattedDate;
+  const dateInput = document.getElementById("dashboard-date");
+
+  if(dateInput && dateInput.value){
+    const d = new Date(dateInput.value);
+    formattedDate = formatDate(d);
+  } else {
+    formattedDate = getDateByTab(currentTab);
+  }
+
+  document.getElementById("selected-date").innerText = formattedDate;
+
+  // 👇 ต้องอยู่ใน function นี้
+  const staffRef = query(
+    collection(db, "staffmeal"),
+    where("date", "==", formattedDate)
+  );
+
+  unsubscribeDashboard = onSnapshot(staffRef, snapshot => {
+    const todayData = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    excelData = todayData;
+
+    document.getElementById("total-staff").innerText = todayData.length;
+    document.getElementById("total-meals").innerText =
+  todayData.reduce((sum, x) => {
+    return sum + (Array.isArray(x.meals) ? x.meals.length : 0);
+  }, 0);
+
+    const table = document.getElementById("dashboard-table");
+table.innerHTML = "";
+
+// 👉 เรียงตามแผนกก่อน
+todayData.sort((a, b) => a.dept.localeCompare(b.dept));
+
+// 👉 หาแผนกทั้งหมด
+const depts = [...new Set(todayData.map(x => x.dept))];
+
+depts.forEach(dept => {
+
+  // 🔹 หัวข้อแผนก
+  let headerRow = document.createElement("tr");
+  headerRow.innerHTML = `
+    <td colspan="5" style="
+  background:#f3e5d8;
+  color:#6d4c41;
+  font-weight:bold;
+  text-align:left;
+  padding:14px;
+  font-size:18px;
+  border-left:5px solid #a47551;
+">
+      🏨 ${dept}
+    </td>
+  `;
+  table.appendChild(headerRow);
+
+  // 🔹 header table
+  let thRow = document.createElement("tr");
+  thRow.innerHTML = `
+    <th>Name</th>
+    <th>Dept</th>
+    <th>Meals</th>
+    <th>Time</th>
+    <th>Action</th>
+  `;
+  table.appendChild(thRow);
+
+  // 🔹 data ของแผนกนั้น
+  todayData
+    .filter(x => x.dept === dept)
+    .reverse()
+    .forEach(x => {
+
+      let row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${x.name}</td>
+        <td>${x.dept}</td>
+        <td>${Array.isArray(x.meals) ? x.meals.join(", ") : "-"}</td>
+        <td>${x.time}</td>
+        <td>
+          <button onclick="editData('${x.id}')">Edit</button>
+          <button onclick="deleteData('${x.id}')">Delete</button>
+        </td>
+      `;
+
+      table.appendChild(row);
+    });
+
+});
+
+    const mealCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
+
+    todayData.forEach(x =>
+      x.meals.forEach(m => {
+        if(mealCounts[m] !== undefined) mealCounts[m]++;
+      })
+    );
+
+    document.getElementById("count-morning").innerText = mealCounts.Morning;
+    document.getElementById("count-noon").innerText = mealCounts.Noon;
+    document.getElementById("count-evening").innerText = mealCounts.Evening;
+    document.getElementById("count-night").innerText = mealCounts.Night;
+
+    const ctx = chartEl.getContext("2d");
+    const gradient = ctx.createLinearGradient(0,0,0,300);
+
+gradient.addColorStop(0,'#ffb347');
+gradient.addColorStop(1,'#ffcc33');
+
+    if (mealsChart) mealsChart.destroy();
+
+    mealsChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Morning','Noon','Evening','Night'],
+       datasets: [{
+  label:'Number of Meals',
+  data:[
+    mealCounts.Morning,
+    mealCounts.Noon,
+    mealCounts.Evening,
+    mealCounts.Night
+  ],
+ backgroundColor:[
+  '#f4c27a',
+  '#d89b5c',
+  '#4db6ac',
+  '#7e57c2'
+],
+  borderRadius:8
+}]
+      },
+      options: {
+  responsive:true,
+  maintainAspectRatio:false, // 🔥 สำคัญ
+  plugins:{ legend:{ display:false }},
+  scales:{
+    y:{ beginAtZero:true, ticks:{ stepSize:1 }}
+  }
+}
+    });
+
+    loadingEl.style.display = "none";
+    chartEl.style.opacity = "1";
+  });
+}
+
+function showKitchen() {
+  const todayStr = getDateByTab("today");
+  const tomorrowStr = getDateByTab("tomorrow");
+
+  document.getElementById("app").innerHTML = `
+    <div class="kitchen">
+
+      <h2> 🥗 Kitchen Dashboard 🥗 </h2>
+
+      <!-- TODAY -->
+      <div class="kitchen-section">
+        <div class="kitchen-date">
+          📅 วันนี้: ${todayStr}
+        </div>
+
+        <div class="kitchen-grid">
+          <div class="kitchen-box">
+            <h1 id="today-morning">0</h1>
+            <p>Morning</p>
+          </div>
+
+          <div class="kitchen-box">
+            <h1 id="today-noon">0</h1>
+            <p>Noon</p>
+          </div>
+
+          <div class="kitchen-box">
+            <h1 id="today-evening">0</h1>
+            <p>Evening</p>
+          </div>
+
+          <div class="kitchen-box">
+            <h1 id="today-night">0</h1>
+            <p>Night</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOMORROW -->
+      <div class="kitchen-section">
+        <div class="kitchen-date">
+          📅 พรุ่งนี้: ${tomorrowStr}
+        </div>
+
+        <div class="kitchen-grid">
+          <div class="kitchen-box">
+            <h1 id="tomorrow-morning">0</h1>
+            <p>Morning</p>
+          </div>
+
+          <div class="kitchen-box">
+            <h1 id="tomorrow-noon">0</h1>
+            <p>Noon</p>
+          </div>
+
+          <div class="kitchen-box">
+            <h1 id="tomorrow-evening">0</h1>
+            <p>Evening</p>
+          </div>
+
+          <div class="kitchen-box">
+            <h1 id="tomorrow-night">0</h1>
+            <p>Night</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="kitchen-back-btn" onclick="goStaff()">
+        ← Back
+      </button>
+
+    </div>
+  `;
+
+  updateKitchenData();
+}
+
+function updateKitchenData() {
+  if(unsubscribeKitchen) unsubscribeKitchen();
+
+  const todayStr = getDateByTab("today");
+  const tomorrowStr = getDateByTab("tomorrow");
+
+  // ✅ ใส่ตรงนี้เลย
+  const todayQuery = query(collection(db,"staffmeal"), where("date","==", todayStr));
+  const tomorrowQuery = query(collection(db,"staffmeal"), where("date","==", tomorrowStr));
+
+  let todayCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
+  let tomorrowCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
+
+  // 👇 listen วันนี้
+  const unsubToday = onSnapshot(todayQuery, snapshot => {
+    todayCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      data.meals.forEach(m => {
+        if(todayCounts[m] !== undefined) todayCounts[m]++;
+      });
+    });
+
+    // update UI วันนี้
+    document.getElementById("today-morning").innerText = todayCounts.Morning;
+    document.getElementById("today-noon").innerText = todayCounts.Noon;
+    document.getElementById("today-evening").innerText = todayCounts.Evening;
+    document.getElementById("today-night").innerText = todayCounts.Night;
+  });
+
+  // 👇 listen พรุ่งนี้
+  const unsubTomorrow = onSnapshot(tomorrowQuery, snapshot => {
+    tomorrowCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      data.meals.forEach(m => {
+        if(tomorrowCounts[m] !== undefined) tomorrowCounts[m]++;
+      });
+    });
+
+    // update UI พรุ่งนี้
+    document.getElementById("tomorrow-morning").innerText = tomorrowCounts.Morning;
+    document.getElementById("tomorrow-noon").innerText = tomorrowCounts.Noon;
+    document.getElementById("tomorrow-evening").innerText = tomorrowCounts.Evening;
+    document.getElementById("tomorrow-night").innerText = tomorrowCounts.Night;
+  }); 
+    
+}
+
+
+
+/* =========================================================
+   ADMIN DATA EDIT / DELETE
+   - ต้องอยู่นอก updateKitchenData()
+   - ใช้ Modal แทน prompt เพื่อรองรับมือถือ
+   ========================================================= */
+
+const DEPARTMENT_OPTIONS = [
+  "ADMIN",
+  "AC (บัญชี)",
+  "FO (ต้อนรับ)",
+  "HR (บุคคล)",
+  "EN (ช่าง)",
+  "HK (แม่บ้าน)",
+  "MK (ครัว)",
+  "FB (เสริฟ)",
+  "GD (คนสวน)"
+];
+
+window.ensureEditModal = function(){
+  if(document.getElementById("adminEditModal")) return;
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div id="adminEditModal" class="admin-edit-modal">
+      <div class="admin-edit-box">
+        <h3>✏️ Edit Staff Meal</h3>
+        <p class="edit-subtitle">แก้ไขข้อมูลพนักงานและมื้ออาหาร</p>
+
+        <input type="hidden" id="editDocId">
+
+        <label for="editName">Staff Name</label>
+        <input id="editName" type="text" placeholder="Staff Name">
+
+        <label for="editDept">Department</label>
+        <select id="editDept">
+          ${DEPARTMENT_OPTIONS.map(d => `<option value="${d}">${d}</option>`).join("")}
+        </select>
+
+        <label>Meals <span style="font-weight:400;font-size:12px;">(เลือกได้สูงสุด 2 มื้อ)</span></label>
+        <div class="edit-meals">
+          <label class="edit-meal-option">
+            <input type="checkbox" value="Morning">
+            <span>🍳 Morning</span>
+          </label>
+          <label class="edit-meal-option">
+            <input type="checkbox" value="Noon">
+            <span>🍛 Noon</span>
+          </label>
+          <label class="edit-meal-option">
+            <input type="checkbox" value="Evening">
+            <span>🍜 Evening</span>
+          </label>
+          <label class="edit-meal-option">
+            <input type="checkbox" value="Night">
+            <span>🌙 Night</span>
+          </label>
+        </div>
+
+        <div class="edit-actions">
+          <button class="edit-cancel" onclick="closeEditModal()">Cancel</button>
+          <button onclick="saveEditedData()">💾 Save</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  document.querySelectorAll("#adminEditModal .edit-meals input").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const checked = document.querySelectorAll("#adminEditModal .edit-meals input:checked");
+      if(checked.length > 2){
+        cb.checked = false;
+        alert("เลือกได้สูงสุด 2 มื้อ");
+      }
+    });
+  });
+
+  document.getElementById("adminEditModal").addEventListener("click", e => {
+    if(e.target.id === "adminEditModal") closeEditModal();
+  });
+};
+
+window.editData = async function(id){
+  try{
+    const snap = await getDoc(doc(db, "staffmeal", id));
+
+    if(!snap.exists()){
+      alert("ไม่พบข้อมูลรายการนี้");
+      return;
+    }
+
+    const data = snap.data();
+
+    ensureEditModal();
+
+    document.getElementById("editDocId").value = id;
+    document.getElementById("editName").value = data.name || "";
+    document.getElementById("editDept").value = data.dept || "";
+
+    document.querySelectorAll("#adminEditModal .edit-meals input").forEach(cb => {
+      cb.checked = Array.isArray(data.meals) && data.meals.includes(cb.value);
+    });
+
+    document.getElementById("adminEditModal").style.display = "flex";
+    document.body.style.overflow = "hidden";
+
+    setTimeout(() => document.getElementById("editName")?.focus(), 100);
+  }catch(err){
+    console.error(err);
+    alert("เปิดข้อมูลเพื่อแก้ไขไม่ได้: " + err.message);
+  }
+};
+
+window.closeEditModal = function(){
+  const modal = document.getElementById("adminEditModal");
+  if(modal) modal.style.display = "none";
+  document.body.style.overflow = "";
+};
+
+window.saveEditedData = async function(){
+  const id = document.getElementById("editDocId")?.value;
+  const name = document.getElementById("editName")?.value.trim();
+  const dept = document.getElementById("editDept")?.value;
+  const meals = [...document.querySelectorAll("#adminEditModal .edit-meals input:checked")]
+    .map(cb => cb.value);
+
+  if(!id){
+    alert("ไม่พบรายการที่ต้องการแก้ไข");
+    return;
+  }
+
+  if(!name || !dept){
+    alert("กรุณากรอกชื่อและแผนกให้ครบ");
+    return;
+  }
+
+  if(meals.length === 0 || meals.length > 2){
+    alert("กรุณาเลือก 1-2 มื้อ");
+    return;
+  }
+
+  const saveBtn = document.querySelector("#adminEditModal .edit-actions button:last-child");
+  if(saveBtn){
+    saveBtn.disabled = true;
+    saveBtn.innerText = "⏳ Saving...";
+  }
+
+  try{
+    await setDoc(doc(db, "staffmeal", id), {
+      name,
+      dept,
+      meals
+    }, { merge:true });
+
+    closeEditModal();
+    alert("✅ Updated successfully");
+  }catch(err){
+    console.error(err);
+    alert("บันทึกข้อมูลไม่ได้: " + err.message);
+  }finally{
+    if(saveBtn){
+      saveBtn.disabled = false;
+      saveBtn.innerText = "💾 Save";
+    }
+  }
+};
+
+window.deleteData = async function(id){
+  if(!confirm("ต้องการลบรายการนี้ใช่ไหม?")) return;
+
+  try{
+    await deleteDoc(doc(db, "staffmeal", id));
+    alert("🗑️ Deleted successfully");
+  }catch(err){
+    console.error(err);
+    alert("ลบข้อมูลไม่ได้: " + err.message);
+  }
+};
+
+function showViewPage(){
+  const todayStr = formatDate();
+
+  document.getElementById("app").innerHTML = `
+    <div class="card">
+      <h3>📋 Staff Meals (${todayStr})</h3>
+      <div id="viewList">⏳ Loading...</div>
+      <br>
+      <button onclick="goStaff()">← Back</button>
+    </div>
+  `;
+
+  if(unsubscribeView) unsubscribeView();
+
+  const q = query(
+    collection(db,"staffmeal"),
+    where("date","==", todayStr)
+  );
+
+  unsubscribeView = onSnapshot(q, snapshot => {
+    const data = snapshot.docs.map(doc => doc.data());
+
+    if(data.length === 0){
+      document.getElementById("viewList").innerHTML = "❌ ไม่มีข้อมูล";
+      return;
+    }
+
+    const depts = [...new Set(data.map(x => x.dept))];
+
+    let html = "";
+
+    let grandTotal = {
+  Morning: 0,
+  Noon: 0,
+  Evening: 0,
+  Night: 0
+};
+
+    depts.forEach(dept => {
+      const deptData = data.filter(x => x.dept === dept);
+
+      // 🔥 นับ total ต่อแผนก
+      let total = {
+        Morning: 0,
+        Noon: 0,
+        Evening: 0,
+        Night: 0
+      };
+
+      deptData.forEach(x => {
+
+  const meals = Array.isArray(x.meals) ? x.meals : [];
+
+  meals.forEach(m => {
+
+    if (total[m] !== undefined) {
+      total[m]++;
+    }
+
+    if (grandTotal[m] !== undefined) {
+      grandTotal[m]++;
+    }
+
+  });
+
+});
+
+      const sumAll = total.Morning + total.Noon + total.Evening + total.Night;
+
+      html += `<h4 style="text-align:left;">🏨 ${dept}</h4>`;
+
+      html += `<div class="table-wrapper"><table>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Morning</th>
+            <th>Noon</th>
+            <th>Evening</th>
+            <th>Night</th>
+          </tr>
+      `;
+
+      deptData.forEach(x => {
+        html += `
+          <tr>
+            <td>${x.name}</td>
+            <td>${x.meals.includes("Morning") ? "✔" : "-"}</td>
+            <td>${x.meals.includes("Noon") ? "✔" : "-"}</td>
+            <td>${x.meals.includes("Evening") ? "✔" : "-"}</td>
+            <td>${x.meals.includes("Night") ? "✔" : "-"}</td>
+          </tr>
+        `;
+      });
+
+      // 🔥 แถว Total
+      html += `
+        <tr style="font-weight:bold; background:#e9f7ef;">
+          <td>Total</td>
+          <td>${total.Morning}</td>
+          <td>${total.Noon}</td>
+          <td>${total.Evening}</td>
+          <td>${total.Night}</td>
+        </tr>
+        <tr style="font-weight:bold; background:#d1e7dd;">
+          <td colspan="5">Total Meals: ${sumAll}</td>
+        </tr>
+      `;
+
+      html += `</table></div><br>`;
+    });
+
+    html += `
+  <div class="table-wrapper">
+    <table style="margin-top:20px;">
+      <tr style="background:#198754; color:white;">
+        <th colspan="5">📊 TOTAL ALL DEPARTMENTS</th>
+      </tr>
+      <tr>
+        <th>Morning</th>
+        <th>Noon</th>
+        <th>Evening</th>
+        <th>Night</th>
+        <th>Total</th>
+      </tr>
+      <tr style="font-weight:bold; background:#d1e7dd;">
+        <td>${grandTotal.Morning}</td>
+        <td>${grandTotal.Noon}</td>
+        <td>${grandTotal.Evening}</td>
+        <td>${grandTotal.Night}</td>
+        <td>${grandTotal.Morning + grandTotal.Noon + grandTotal.Evening + grandTotal.Night}</td>
+      </tr>
+    </table>
+  </div>
+`;
+
+    document.getElementById("viewList").innerHTML = html;
+  });
+}
+
+window.goStaff = function(){
+  location.hash = "";
+  mode = "";
+  renderPage();
+};
+
+window.deleteAnnouncement = async function(){
+  if(confirm("ลบประกาศวันนี้?")){
+    await deleteDoc(doc(db,"announcements", formatDate()));
+    alert("🗑️ Deleted");
+  }
+};
+
+window.switchTab = function(tab){
+  currentTab = tab;
+
+  document.getElementById("tab-today").classList.toggle("active-tab", tab==="today");
+  document.getElementById("tab-tomorrow").classList.toggle("active-tab", tab==="tomorrow");
+
+  const dateInput = document.getElementById("dashboard-date");
+  const baseDate = new Date();
+  if(tab === "tomorrow"){
+    baseDate.setDate(baseDate.getDate() + 1);
+  }
+  dateInput.value = baseDate.toISOString().split('T')[0];
+
+  updateDashboardData();
+}
+window.showTodayMenu = async function(){
+const todayStr = formatDate();
+const d = new Date();
+const prettyDate = d.toLocaleDateString('th-TH', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+});
+document.getElementById("menu-date").innerText = "📅 " + prettyDate;
+
+  const menuDoc = doc(db, "menu", todayStr);
+  const menuSnap = await getDoc(menuDoc);
+
+  let data;
+  if(menuSnap.exists()){
+    data = menuSnap.data();
+  } else {
+    data = {
+      Morning:"❌ ยังไม่กำหนด",
+      Noon:"❌ ยังไม่กำหนด",
+      Evening:"❌ ยังไม่กำหนด",
+      Night:"❌ ยังไม่กำหนด"
+    };
+  }
+
+  document.getElementById("menu-morning").innerText = data.Morning;
+  document.getElementById("menu-noon").innerText = data.Noon;
+  document.getElementById("menu-evening").innerText = data.Evening;
+  document.getElementById("menu-night").innerText = data.Night;
+
+  document.getElementById("menuModal").style.display = "flex";
+}
+
+window.closeMenuModal = function(){
+  document.getElementById("menuModal").style.display = "none";
+}
+
+function closePopup(){
+  document.getElementById("popupAnnounce").style.display = "none";
+}
+
+</script>
+
+<!-- ✅ วาง popup ตรงนี้ -->
+<div id="popupAnnounce" style="
+  display:none;
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:white;
+  width:90%;
+  max-width:380px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  z-index:9999;
+  overflow:hidden;
+">
+
+  <img id="popupImage" style="
+    width:100%;
+    max-height:200px;
+    object-fit:cover;
+    display:none;
+  ">
+
+  <div style="padding:15px; text-align:center;">
+    <div id="popupText"></div>
+    <button onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<!-- 🔊 Notification Sound -->
+<audio id="announceSound">
+  <source src="notify.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="bgMusic" loop preload="auto">
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+</body>
+</html>
