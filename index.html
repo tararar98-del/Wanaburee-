@@ -2215,12 +2215,13 @@ window.exportExcel = async function() {
   Name: x.name || "",
   Dept: x.dept || "",
   Meal: Array.isArray(x.meals) ? x.meals.join(", ") : "",
-  Time: x.time || ""
+  Time: x.time || "",
+  RegisteredBy: x.registeredBy === "ADMIN" ? "Admin" : "Staff"
 }));
 
   // 🔥 สร้าง sheet
   let ws = XLSX.utils.json_to_sheet(formattedData, {
-  header: ["Date","Name","Dept","Meal","Time"]
+  header: ["Date","Name","Dept","Meal","Time","RegisteredBy"]
 });
 
   let wb = XLSX.utils.book_new();
@@ -2245,6 +2246,10 @@ function showDashboard() {
 
       <button onclick="switchTab('tomorrow')" id="tab-tomorrow">
         Tomorrow
+      </button>
+
+      <button onclick="openAdminRegisterModal()" style="background:linear-gradient(135deg,#198754,#2e9d68);">
+        ➕ Register for Staff
       </button>
 
       <input
@@ -2436,7 +2441,7 @@ depts.forEach(dept => {
         <td>${x.name}</td>
         <td>${x.dept}</td>
         <td>${Array.isArray(x.meals) ? x.meals.join(", ") : "-"}</td>
-        <td>${x.time}</td>
+        <td>${x.time || "-"}${x.registeredBy === "ADMIN" ? "<br><small style='color:#198754;font-weight:700;'>✍ Admin Entry</small>" : ""}</td>
         <td>
           <button onclick="editData('${x.id}')">Edit</button>
           <button onclick="deleteData('${x.id}')">Delete</button>
@@ -2652,6 +2657,182 @@ const DEPARTMENT_OPTIONS = [
   "FB (เสริฟ)",
   "GD (คนสวน)"
 ];
+
+/* =========================================================
+   ADMIN REGISTER FOR STAFF
+   Admin can register a staff member for a selected date.
+   Uses the existing staffmeal collection and date format.
+   ========================================================= */
+
+const ADMIN_REGISTER_DEPARTMENTS = [
+  "ADMIN",
+  "AC(บัญชี)",
+  "FO(ต้อนรับ)",
+  "HR(บุคคล)",
+  "EN(ช่าง)",
+  "HK(แม่บ้าน)",
+  "MK(ครัว)",
+  "FB(เสริฟ)",
+  "GD(คนสวน)"
+];
+
+function htmlEscape(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[ch]));
+}
+
+window.openAdminRegisterModal = function(){
+  if(!document.getElementById("adminRegisterModal")){
+    document.body.insertAdjacentHTML("beforeend", `
+      <div id="adminRegisterModal" class="admin-edit-modal">
+        <div class="admin-edit-box">
+          <h3>➕ Register Meal for Staff</h3>
+          <p class="edit-subtitle">Admin สามารถลงทะเบียนแทนพนักงานที่ลืมลงชื่อได้</p>
+
+          <label for="adminRegName">Staff Name</label>
+          <input id="adminRegName" type="text" placeholder="กรอกชื่อพนักงาน" autocomplete="off">
+
+          <label for="adminRegDept">Department</label>
+          <select id="adminRegDept">
+            <option value="">-- Select Department --</option>
+            ${ADMIN_REGISTER_DEPARTMENTS.map(d => `<option value="${d}">${d}</option>`).join("")}
+          </select>
+
+          <label for="adminRegDate">Registration Date</label>
+          <input id="adminRegDate" type="date">
+
+          <label>Meals <span style="font-weight:400;font-size:12px;">(เลือกได้ 1-2 มื้อ)</span></label>
+          <div class="edit-meals" id="adminRegMeals">
+            <label class="edit-meal-option"><input type="checkbox" value="Morning"><span>🍳 Morning</span></label>
+            <label class="edit-meal-option"><input type="checkbox" value="Noon"><span>🍛 Noon</span></label>
+            <label class="edit-meal-option"><input type="checkbox" value="Evening"><span>🍜 Evening</span></label>
+            <label class="edit-meal-option"><input type="checkbox" value="Night"><span>🌙 Night</span></label>
+          </div>
+
+          <p id="adminRegMessage" style="font-size:13px;color:#795548;margin-top:10px;">
+            ระบบจะตรวจสอบรายการซ้ำก่อนบันทึก
+          </p>
+
+          <div class="edit-actions">
+            <button class="edit-cancel" onclick="closeAdminRegisterModal()">Cancel</button>
+            <button id="adminRegSaveBtn" onclick="saveAdminRegistration()">💾 Save Registration</button>
+          </div>
+        </div>
+      </div>
+    `);
+
+    document.querySelectorAll("#adminRegMeals input").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const checked = document.querySelectorAll("#adminRegMeals input:checked");
+        if(checked.length > 2){
+          cb.checked = false;
+          alert("เลือกได้สูงสุด 2 มื้อ");
+        }
+      });
+    });
+
+    document.getElementById("adminRegisterModal").addEventListener("click", e => {
+      if(e.target.id === "adminRegisterModal") closeAdminRegisterModal();
+    });
+  }
+
+  // Default to the date currently selected in the dashboard.
+  const dashboardDate = document.getElementById("dashboard-date")?.value;
+  const dateInput = document.getElementById("adminRegDate");
+  dateInput.value = dashboardDate || new Date().toLocaleDateString("en-CA");
+
+  document.getElementById("adminRegName").value = "";
+  document.getElementById("adminRegDept").value = "";
+  document.querySelectorAll("#adminRegMeals input").forEach(cb => cb.checked = false);
+  document.getElementById("adminRegMessage").innerText =
+    "ระบบจะตรวจสอบรายการซ้ำก่อนบันทึก";
+  document.getElementById("adminRegisterModal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+};
+
+window.closeAdminRegisterModal = function(){
+  const modal = document.getElementById("adminRegisterModal");
+  if(modal) modal.style.display = "none";
+  document.body.style.overflow = "";
+};
+
+window.saveAdminRegistration = async function(){
+  const name = document.getElementById("adminRegName")?.value.trim();
+  const dept = document.getElementById("adminRegDept")?.value;
+  const dateValue = document.getElementById("adminRegDate")?.value;
+  const meals = [...document.querySelectorAll("#adminRegMeals input:checked")].map(cb => cb.value);
+  const saveBtn = document.getElementById("adminRegSaveBtn");
+
+  if(!name || !dept || !dateValue){
+    alert("กรุณากรอกชื่อ แผนก และวันที่ให้ครบ");
+    return;
+  }
+  if(meals.length < 1 || meals.length > 2){
+    alert("กรุณาเลือกอาหาร 1-2 มื้อ");
+    return;
+  }
+
+  // Convert YYYY-MM-DD to the existing DD-MM-YYYY format using local date parts.
+  const [year, month, day] = dateValue.split("-");
+  const formattedDate = `${day}-${month}-${year}`;
+  const cleanName = name.toLocaleLowerCase().replace(/\s+/g, " ");
+
+  if(saveBtn){
+    saveBtn.disabled = true;
+    saveBtn.innerText = "⏳ Saving...";
+  }
+
+  try{
+    // Check all registrations for the selected date before writing.
+    const sameDateQuery = query(
+      collection(db, "staffmeal"),
+      where("date", "==", formattedDate)
+    );
+    const snapshot = await getDocs(sameDateQuery);
+
+    const duplicate = snapshot.docs.some(docSnap => {
+      const data = docSnap.data();
+      const existingName = String(data.name || "").trim().toLocaleLowerCase().replace(/\s+/g, " ");
+      return existingName === cleanName && data.dept === dept;
+    });
+
+    if(duplicate){
+      alert(`⚠️ ${name} (${dept}) มีรายการลงทะเบียนวันที่ ${formattedDate} แล้ว`);
+      return;
+    }
+
+    if(!confirm(`ยืนยันลงทะเบียนแทนพนักงาน?\n\nชื่อ: ${name}\nแผนก: ${dept}\nวันที่: ${formattedDate}\nมื้ออาหาร: ${meals.join(", ")}`)){
+      return;
+    }
+
+    await setDoc(doc(collection(db, "staffmeal")), {
+      name,
+      dept,
+      meals,
+      date: formattedDate,
+      time: new Date().toLocaleTimeString("en-GB"),
+      registeredBy: "ADMIN"
+    });
+
+    alert("✅ ลงทะเบียนแทนพนักงานเรียบร้อยแล้ว");
+    closeAdminRegisterModal();
+
+    // Refresh the dashboard for the newly registered date.
+    const dashboardDateInput = document.getElementById("dashboard-date");
+    if(dashboardDateInput) dashboardDateInput.value = dateValue;
+    updateDashboardData();
+
+  }catch(err){
+    console.error(err);
+    alert("บันทึกข้อมูลไม่สำเร็จ: " + err.message);
+  }finally{
+    if(saveBtn){
+      saveBtn.disabled = false;
+      saveBtn.innerText = "💾 Save Registration";
+    }
+  }
+};
 
 window.ensureEditModal = function(){
   if(document.getElementById("adminEditModal")) return;
