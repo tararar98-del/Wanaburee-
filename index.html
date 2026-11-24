@@ -1504,6 +1504,8 @@ body{
     return formatDate(new Date(), 1);  
   }
 }
+    let unsubscribeAnnouncement = null;
+    let unsubscribeAnnouncementList = null;
     let unsubscribeStaff = null;
     let unsubscribeKitchen = null;
     let unsubscribeMenu = null;
@@ -1512,14 +1514,21 @@ body{
     let isFirstLoad = true;
 
   function clearListeners(){  
-  if(unsubscribeStaff) unsubscribeStaff();  
-  if(unsubscribeKitchen) unsubscribeKitchen();  
-  if(unsubscribeDashboard) unsubscribeDashboard();
-  if(unsubscribeView) unsubscribeView();  
-  if(unsubscribeMenu) unsubscribeMenu();  
+  if(unsubscribeAnnouncement) { unsubscribeAnnouncement(); unsubscribeAnnouncement = null; }
+  if(unsubscribeAnnouncementList) { unsubscribeAnnouncementList(); unsubscribeAnnouncementList = null; }
+  if(unsubscribeStaff) { unsubscribeStaff(); unsubscribeStaff = null; }
+  if(unsubscribeKitchen) { unsubscribeKitchen(); unsubscribeKitchen = null; }
+  if(unsubscribeDashboard) { unsubscribeDashboard(); unsubscribeDashboard = null; }
+  if(unsubscribeView) { unsubscribeView(); unsubscribeView = null; }
+  if(unsubscribeMenu) { unsubscribeMenu(); unsubscribeMenu = null; }  
 }
     
-   function formatDate(date = new Date(), addDays = 0) {
+   function formatDateInput(date = new Date()) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function formatDate(date = new Date(), addDays = 0) {
   const d = new Date(date);
   d.setHours(0,0,0,0); // 👈 สำคัญ
   d.setDate(d.getDate() + addDays);
@@ -1531,11 +1540,6 @@ body{
   return `${day}-${month}-${year}`;
 }
     
-   if(mode=="admin") showLogin();
-else if(mode=="kitchen") showKitchen();
-else if(mode=="view") showViewPage();
-else showStaff();
-
    function showStaff(){
   renderStaff();
   updateMenuUI(); // 👈 เพิ่มตรงนี้
@@ -1544,7 +1548,7 @@ else showStaff();
 
 let lastAnnounce = "";
 
-onSnapshot(doc(db,"announcements", todayStr), (docSnap)=>{
+unsubscribeAnnouncement = onSnapshot(doc(db,"announcements", todayStr), (docSnap)=>{
   const box = document.getElementById("announcementBox");
 
   if(docSnap.exists()){
@@ -1552,8 +1556,8 @@ onSnapshot(doc(db,"announcements", todayStr), (docSnap)=>{
 
     box.style.display = "block";
     box.innerHTML = `
-  📢 ${data.text || ""}
-  ${data.image ? `<br><img src="${data.image}" style="max-width:100%; margin-top:10px; border-radius:10px;">` : ""}
+  📢 ${htmlEscape(data.text || "")}
+  ${data.image ? `<br><img src="${data.image}" alt="Announcement" style="max-width:100%; margin-top:10px; border-radius:10px;">` : ""}
 `;
 
   if(lastAnnounce !== data.text){
@@ -1576,9 +1580,9 @@ onSnapshot(doc(db,"announcements", todayStr), (docSnap)=>{
   // 🔊 เล่นเสียง
 const sound = document.getElementById("announceSound");
 
-document.addEventListener("click", () => {
-    sound.load();   // โหลดไฟล์เสียง
-}, { once: true });
+sound?.play().catch(() => {
+  // Browser may block notification audio until the user interacts with the page.
+});
 
   setTimeout(()=>{
     popup.style.display = "none";
@@ -1628,14 +1632,17 @@ if(menuEl){
 }
 
 function toggleMeal(el) {
-  const checkbox = el.querySelector("input");
+  // Checkbox state has already changed when onchange calls this function.
+  const checkbox = el?.querySelector("input");
+  if(!checkbox) return;
 
-  checkbox.checked = !checkbox.checked;
-
-  checkbox.dispatchEvent(new Event('change'));
+  const checkedCountBeforeLimit = document.querySelectorAll(".meal input:checked").length;
+  if(checkedCountBeforeLimit > 2) {
+    checkbox.checked = false;
+    alert("เลือกได้สูงสุด 2 มื้อ");
+  }
 
   const checkedCount = document.querySelectorAll(".meal input:checked").length;
-
   document.querySelectorAll(".meal").forEach(meal => {
     const cb = meal.querySelector("input");
     cb.disabled = !cb.checked && checkedCount >= 2;
@@ -1918,8 +1925,8 @@ const depts = deptOrder.filter(dept =>
         html += `<table><tr><th>Name</th><th>Meals</th></tr>`;
         tomorrowData.filter(x => x.dept === dept).forEach(x => {
           html += `<tr>
-            <td>${x.name}</td>
-            <td>${x.meals.join(", ")}</td>
+            <td>${htmlEscape(x.name || "")}</td>
+            <td>${(Array.isArray(x.meals) ? x.meals : []).map(htmlEscape).join(", ")}</td>
           </tr>`;
         });
         html += `</table>`;
@@ -1960,13 +1967,6 @@ window.register = async function() {
   return;
 }
 
-if(!confirm("ยืนยันการลงทะเบียนใช่ไหม?")) {
-  btn.disabled = false;
-  btn.innerText = "Register";
-  isSubmitting = false;
-  return;
-}
-
     const meals = [...document.querySelectorAll(".meal input:checked")].map(x => x.value);
     console.log("MEALS:", meals);
 
@@ -1980,11 +1980,19 @@ if(!confirm("ยืนยันการลงทะเบียนใช่ไ�
 
   return;
 }
-    // 🔥 (แก้ข้อ 3 ด้วยด้านล่าง)
+    if(!confirm("ยืนยันการลงทะเบียนใช่ไหม?")) {
+      btn.disabled = false;
+      btn.innerText = "Register";
+      btn.style.opacity = "1";
+      isSubmitting = false;
+      return;
+    }
+
+    // Duplicate check
     const cleanName = name.trim().toLowerCase();
 
 const isDuplicate = allData.find(x =>
-  x.name.trim().toLowerCase() === cleanName &&
+  String(x.name || "").trim().toLowerCase() === cleanName &&
   x.dept === dept
 );
    if (isDuplicate) {
@@ -1992,6 +2000,7 @@ const isDuplicate = allData.find(x =>
 
   btn.disabled = false;
   btn.innerText = "Register";
+  btn.style.opacity = "1";
   isSubmitting = false;
 
   return;
@@ -2008,7 +2017,8 @@ await setDoc(newDocRef, {
   date: formatDate(new Date(), 1) // บันทึกสำหรับวันถัดไป
 });
 
-   localStorage.setItem("lastRegistered", name);
+   lastRegistered = name;
+    localStorage.setItem("lastRegistered", name);
    document.getElementById("msg").innerHTML =
   "<div class='success'>✔ Registration Successful</div>";
 
@@ -2087,8 +2097,8 @@ window.loadAnnouncements = function(){
 
       html += `
         <div style="background:#f8f9fa; padding:10px; border-radius:8px; margin-bottom:8px;">
-          <div>${data.text}</div>
-          <small>${data.date} ${data.time}</small><br>
+          <div>${htmlEscape(data.text || "")}</div>
+          <small>${htmlEscape(data.date || "")} ${htmlEscape(data.time || "")}</small><br>
           <button onclick="deleteAnnouncement('${id}')" style="margin-top:5px; background:red;">Delete</button>
         </div>
       `;
@@ -2130,10 +2140,10 @@ window.showMenuSetting = function() {
     <div class="card">
       <h3>🍽️ Meal Menu Setting</h3>
 
-<input id="m1" placeholder="Morning menu" value="${menu.Morning || ''}">
-<input id="m2" placeholder="Noon menu" value="${menu.Noon || ''}">
-<input id="m3" placeholder="Evening menu" value="${menu.Evening || ''}">
-<input id="m4" placeholder="Night menu" value="${menu.Night || ''}">
+<input id="m1" placeholder="Morning menu" value="${htmlEscape(menu.Morning || '')}">
+<input id="m2" placeholder="Noon menu" value="${htmlEscape(menu.Noon || '')}">
+<input id="m3" placeholder="Evening menu" value="${htmlEscape(menu.Evening || '')}">
+<input id="m4" placeholder="Night menu" value="${htmlEscape(menu.Night || '')}">
 
       <button onclick="saveMenuAndGo()">💾 Save & Go to Dashboard</button>
 
@@ -2183,13 +2193,6 @@ window.saveMenuAndGo = async function(){
   showDashboard();
 };
 
-document.addEventListener("click", () => {
-    bgMusic.volume = 0.3;
-    bgMusic.play().catch(err => console.log(err));
-}, { once: true });
-
-
-
 // --- SPA initial load ---
 renderPage();
 
@@ -2201,8 +2204,8 @@ window.exportExcel = async function() {
   const dateInput = document.getElementById("dashboard-date");
 
   if(dateInput && dateInput.value){
-    const d = new Date(dateInput.value);
-    formattedDate = formatDate(d);
+    const [y, m, day] = dateInput.value.split("-").map(Number);
+    formattedDate = formatDate(new Date(y, m - 1, day));
   } else {
     formattedDate = getDateByTab(currentTab);
   }
@@ -2258,7 +2261,7 @@ function showDashboard() {
       <input
         type="date"
         id="dashboard-date"
-        value="${new Date().toISOString().split('T')[0]}"
+        value="${formatDateInput()}"
         onchange="updateDashboardData()"
       >
 
@@ -2365,8 +2368,8 @@ function updateDashboardData(){
   const dateInput = document.getElementById("dashboard-date");
 
   if(dateInput && dateInput.value){
-    const d = new Date(dateInput.value);
-    formattedDate = formatDate(d);
+    const [y, m, day] = dateInput.value.split("-").map(Number);
+    formattedDate = formatDate(new Date(y, m - 1, day));
   } else {
     formattedDate = getDateByTab(currentTab);
   }
@@ -2416,7 +2419,7 @@ depts.forEach(dept => {
   font-size:18px;
   border-left:5px solid #a47551;
 ">
-      🏨 ${dept}
+      🏨 ${htmlEscape(dept)}
     </td>
   `;
   table.appendChild(headerRow);
@@ -2441,9 +2444,9 @@ depts.forEach(dept => {
       let row = document.createElement("tr");
 
       row.innerHTML = `
-        <td>${x.name}</td>
-        <td>${x.dept}</td>
-        <td>${Array.isArray(x.meals) ? x.meals.join(", ") : "-"}</td>
+        <td>${htmlEscape(x.name || "")}</td>
+        <td>${htmlEscape(x.dept || "")}</td>
+        <td>${Array.isArray(x.meals) ? x.meals.map(htmlEscape).join(", ") : "-"}</td>
         <td>${x.time || "-"}${x.registeredBy === "ADMIN" ? "<br><small style='color:#198754;font-weight:700;'>✍ Admin Entry</small>" : ""}</td>
         <td>
           <button onclick="editData('${x.id}')">Edit</button>
@@ -2458,11 +2461,11 @@ depts.forEach(dept => {
 
     const mealCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
 
-    todayData.forEach(x =>
-      x.meals.forEach(m => {
+    todayData.forEach(x => {
+      (Array.isArray(x.meals) ? x.meals : []).forEach(m => {
         if(mealCounts[m] !== undefined) mealCounts[m]++;
-      })
-    );
+      });
+    });
 
     document.getElementById("count-morning").innerText = mealCounts.Morning;
     document.getElementById("count-noon").innerText = mealCounts.Noon;
@@ -2604,12 +2607,12 @@ function updateKitchenData() {
   let tomorrowCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
 
   // 👇 listen วันนี้
-  const unsubToday = onSnapshot(todayQuery, snapshot => {
+  let unsubToday = onSnapshot(todayQuery, snapshot => {
     todayCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
 
     snapshot.forEach(doc => {
       const data = doc.data();
-      data.meals.forEach(m => {
+      (Array.isArray(data.meals) ? data.meals : []).forEach(m => {
         if(todayCounts[m] !== undefined) todayCounts[m]++;
       });
     });
@@ -2622,12 +2625,12 @@ function updateKitchenData() {
   });
 
   // 👇 listen พรุ่งนี้
-  const unsubTomorrow = onSnapshot(tomorrowQuery, snapshot => {
+  let unsubTomorrow = onSnapshot(tomorrowQuery, snapshot => {
     tomorrowCounts = { Morning:0, Noon:0, Evening:0, Night:0 };
 
     snapshot.forEach(doc => {
       const data = doc.data();
-      data.meals.forEach(m => {
+      (Array.isArray(data.meals) ? data.meals : []).forEach(m => {
         if(tomorrowCounts[m] !== undefined) tomorrowCounts[m]++;
       });
     });
@@ -2639,6 +2642,13 @@ function updateKitchenData() {
     document.getElementById("tomorrow-night").innerText = tomorrowCounts.Night;
   }); 
     
+
+  // Stop both realtime listeners when leaving the Kitchen page.
+  unsubscribeKitchen = () => {
+    if(unsubToday) unsubToday();
+    if(unsubTomorrow) unsubTomorrow();
+  };
+
 }
 
 
@@ -2650,16 +2660,8 @@ function updateKitchenData() {
    ========================================================= */
 
 const DEPARTMENT_OPTIONS = [
-  "ADMIN",
-  "AC (บัญชี)",
-  "FO (ต้อนรับ)",
-  "HR (บุคคล)",
-  "EN (ช่าง)",
-  "HK (แม่บ้าน)",
-  "MK (ครัว)",
-  "FB (เสริฟ)",
-  "GD (คนสวน)",
-  "SPA(นวด)"
+  "ADMIN", "AC(บัญชี)", "FO(ต้อนรับ)", "HR(บุคคล)", "EN(ช่าง)",
+  "HK(แม่บ้าน)", "MK(ครัว)", "FB(เสริฟ)", "GD(คนสวน)", "SPA(นวด)"
 ];
 
 /* =========================================================
@@ -2669,16 +2671,8 @@ const DEPARTMENT_OPTIONS = [
    ========================================================= */
 
 const ADMIN_REGISTER_DEPARTMENTS = [
-  "ADMIN",
-  "AC(บัญชี)",
-  "FO(ต้อนรับ)",
-  "HR(บุคคล)",
-  "EN(ช่าง)",
-  "HK(แม่บ้าน)",
-  "MK(ครัว)",
-  "FB(เสริฟ)",
-  "GD(คนสวน)",
-  "SPA(นวด)"
+  "ADMIN", "AC(บัญชี)", "FO(ต้อนรับ)", "HR(บุคคล)", "EN(ช่าง)",
+  "HK(แม่บ้าน)", "MK(ครัว)", "FB(เสริฟ)", "GD(คนสวน)", "SPA(นวด)"
 ];
 
 function htmlEscape(value){
@@ -2745,7 +2739,7 @@ window.openAdminRegisterModal = function(){
   // Default to the date currently selected in the dashboard.
   const dashboardDate = document.getElementById("dashboard-date")?.value;
   const dateInput = document.getElementById("adminRegDate");
-  dateInput.value = dashboardDate || new Date().toLocaleDateString("en-CA");
+  dateInput.value = dashboardDate || formatDateInput();
 
   document.getElementById("adminRegName").value = "";
   document.getElementById("adminRegDept").value = "";
@@ -3067,10 +3061,9 @@ function showViewPage(){
 
       const sumAll = total.Morning + total.Noon + total.Evening + total.Night;
 
-      html += `<h4 style="text-align:left;">🏨 ${dept}</h4>`;
+      html += `<h4 style="text-align:left;">🏨 ${htmlEscape(dept)}</h4>`;
 
       html += `<div class="table-wrapper"><table>
-        <table>
           <tr>
             <th>Name</th>
             <th>Morning</th>
@@ -3084,10 +3077,10 @@ function showViewPage(){
         html += `
           <tr>
             <td>${x.name}</td>
-            <td>${x.meals.includes("Morning") ? "✔" : "-"}</td>
-            <td>${x.meals.includes("Noon") ? "✔" : "-"}</td>
-            <td>${x.meals.includes("Evening") ? "✔" : "-"}</td>
-            <td>${x.meals.includes("Night") ? "✔" : "-"}</td>
+            <td>${Array.isArray(x.meals) && x.meals.includes("Morning") ? "✔" : "-"}</td>
+            <td>${Array.isArray(x.meals) && x.meals.includes("Noon") ? "✔" : "-"}</td>
+            <td>${Array.isArray(x.meals) && x.meals.includes("Evening") ? "✔" : "-"}</td>
+            <td>${Array.isArray(x.meals) && x.meals.includes("Night") ? "✔" : "-"}</td>
           </tr>
         `;
       });
@@ -3143,10 +3136,16 @@ window.goStaff = function(){
   renderPage();
 };
 
-window.deleteAnnouncement = async function(){
-  if(confirm("ลบประกาศวันนี้?")){
-    await deleteDoc(doc(db,"announcements", formatDate()));
-    alert("🗑️ Deleted");
+window.deleteAnnouncement = async function(id){
+  const targetId = id || formatDate();
+  if(confirm(id ? "ต้องการลบประกาศรายการนี้ใช่ไหม?" : "ลบประกาศวันนี้?")){
+    try{
+      await deleteDoc(doc(db,"announcements", targetId));
+      alert("🗑️ Deleted");
+    }catch(err){
+      console.error(err);
+      alert("ลบประกาศไม่สำเร็จ: " + err.message);
+    }
   }
 };
 
@@ -3161,7 +3160,7 @@ window.switchTab = function(tab){
   if(tab === "tomorrow"){
     baseDate.setDate(baseDate.getDate() + 1);
   }
-  dateInput.value = baseDate.toISOString().split('T')[0];
+  dateInput.value = formatDateInput(baseDate);
 
   updateDashboardData();
 }
